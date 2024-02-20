@@ -39,7 +39,7 @@ func (s *Server) setupViews() {
 func (s *Server) setupMiddleware() {
 	s.router.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}, latency=${latency_human}\n",
-	  }))
+	}))
 }
 
 func (s *Server) setupRoutes() {
@@ -52,6 +52,32 @@ func (s *Server) setupRoutes() {
 		e.Response().WriteHeader(http.StatusOK)
 		return jsoniter.NewEncoder(e.Response().Writer).Encode(map[string]string{"name": name})
 	})
+	s.router.GET("/api/search", func(e echo.Context) error {
+		query := e.QueryParam("id")
+		if query == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "id is required")
+		}
+
+		e.Response().WriteHeader(http.StatusOK)
+		return jsoniter.NewEncoder(e.Response().Writer).Encode(map[string]string{"query": query})
+	})
+	s.router.POST("/api/register", func(e echo.Context) error {
+		body := struct {
+			Name string `json:"name"`
+		}{}
+
+		if err := jsoniter.NewDecoder(e.Request().Body).Decode(&body); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
+		}
+
+		if body.Name == "" {
+			return echo.NewHTTPError(http.StatusBadRequest, "name is required")
+		}
+
+		e.Response().WriteHeader(http.StatusCreated)
+		return nil
+	})
+
 }
 
 func (s *Server) Start() {

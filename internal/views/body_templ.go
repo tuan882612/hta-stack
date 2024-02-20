@@ -10,7 +10,7 @@ import "context"
 import "io"
 import "bytes"
 
-func Layout() templ.Component {
+func body() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -23,15 +23,7 @@ func Layout() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>My App</title><script src=\"https://unpkg.com/htmx.org@latest\"></script><!-- Alpine Core --><script defer src=\"https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js\"></script></head>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = body().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body><div x-data=\"{show_new: false}\" x-init=\"$watch(&#39;show_new&#39;, value =&gt; {\n        if (show_new) {\n          htmx.process(document.querySelector(&#39;#new_content&#39;))\n        }\n    })\"><button @click=\"show_new = !show_new\">Toggle New Content</button><template x-if=\"show_new\"><div id=\"new_content\"><a :hx-get=\"/api/ + show_new\" href=\"#\">New Clickable</a></div></template></div></body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

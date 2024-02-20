@@ -1,20 +1,15 @@
 package views
 
 templ Layout() {
-	<head>
-		<title>My App</title>
-		<script src="https://unpkg.com/htmx.org/dist/ext/path-params.js"></script>
-		<script src="https://unpkg.com/htmx.org@1.9.10"></script>
-		<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
-	</head>
-	<div hx-ext="path-params">
-		Enter a name: <input type="text" x-model="name"/>
-		<button
-			type="submit"
-      hx-trigger="#results"
-		>submit</button>
-		<span id="results">
-      <a hx-get="/api/" hx-vals='{"name": x-model}'>Empty Message</a>
-    </span>
-	</div>
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>My App</title>
+			<script src="https://unpkg.com/htmx.org@latest"></script>
+			<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		</head>
+		@body()
+	</html>
 }

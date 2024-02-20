@@ -1,0 +1,22 @@
+package views
+
+templ body() {
+	<body>
+		<div
+			x-data="{show_new: false}"
+			x-init="
+      $watch('show_new', value => {
+        if (show_new) {
+          htmx.process(document.querySelector('#new_content'))
+        }
+      })"
+		>
+			<button @click="show_news = !show_new">Toggle New Content</button>
+			<template x-if="show_new">
+				<div id="new_content">
+					<a :hx-get="/api/ + show_new" href="#">New Clickable</a>
+				</div>
+			</template>
+		</div>
+	</body>
+}
