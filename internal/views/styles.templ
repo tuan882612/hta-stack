@@ -1,0 +1,49 @@
+package views
+
+templ bodyStyles() {
+	<style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    input[type="text"] {
+      width: 300px;
+      padding: 10px;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #search_results {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    #search_results_container {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    /* Transition for showing/hiding elements */
+    [x-cloak], [x-show="false"] {
+      display: none !important;
+    }
+  </style>
+}

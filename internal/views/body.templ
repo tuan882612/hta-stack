@@ -3,20 +3,38 @@ package views
 templ body() {
 	<body>
 		<div
-			x-data="{show_new: false}"
-			x-init="
-      $watch('show_new', value => {
-        if (show_new) {
-          htmx.process(document.querySelector('#new_content'))
-        }
-      })"
+			x-data="{
+        query: '',
+        search_complete: false,
+        search() {
+          if (this.query.length === 0) return;
+          htmx.ajax(
+            'GET', 
+            '/api/' + document.querySelector('[x-data] input[type=text]').value, 
+            target = '#temp_search_results',
+          );
+          this.search_complete = true;
+        },
+      }"
 		>
-			<button @click="show_news = !show_new">Toggle New Content</button>
-			<template x-if="show_new">
-				<div id="new_content">
-					<a :hx-get="/api/ + show_new" href="#">New Clickable</a>
-				</div>
-			</template>
+			<input x-model="query" type="text" placeholder="Search..."/>
+			<button @click="search()">Search</button>
+			<button @click="query = '', search_complete = false">Clear</button>
+      <div id="search_results_container" x-show="search_complete">
+        <div id="temp_search_results"></div>
+      </div>
+			<p x-show="!search_complete">Search for something...</p>
 		</div>
+		<script>
+		  htmx.on('htmx:afterRequest', function(event) { 
+		    query = document.querySelector('[x-data] input[type=text]').value;
+		    if (event.detail.pathInfo.requestPath !== '/api/' + query) return;
+        var res = JSON.parse(event.detail.xhr.response);
+        document.getElementById('temp_search_results').innerHTML = res.map(function(item) {
+          return '<div> <p id="search_results">' + "Name: " + item.name + '</p> </div>';
+        }).join('');
+		  });
+		</script>
+		@bodyStyles()
 	</body>
 }

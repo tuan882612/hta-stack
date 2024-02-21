@@ -23,7 +23,15 @@ func body() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body><div x-data=\"{show_new: false}\" x-init=\"$watch(&#39;show_new&#39;, value =&gt; {\n        if (show_new) {\n          htmx.process(document.querySelector(&#39;#new_content&#39;))\n        }\n    })\"><button @click=\"show_new = !show_new\">Toggle New Content</button><template x-if=\"show_new\"><div id=\"new_content\"><a :hx-get=\"/api/ + show_new\" href=\"#\">New Clickable</a></div></template></div></body>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body><div x-data=\"{\n        query: &#39;&#39;,\n        search_complete: false,\n        search_results: [],\n        search() {\n          if (this.query.length === 0) return;\n          htmx.ajax(\n            &#39;GET&#39;, \n            &#39;/api/&#39; + document.querySelector(&#39;[x-data] input[type=text]&#39;).value, \n            target = &#39;#temp_search_results&#39;,\n          );\n          this.search_complete = true;\n        },\n      }\"><input x-model=\"query\" type=\"text\" placeholder=\"Search...\"> <button @click=\"search()\">Search</button> <button @click=\"query = &#39;&#39;, search_complete = false\">Clear</button><div id=\"search_results_container\" x-show=\"search_complete\"><div id=\"temp_search_results\"></div></div><p x-show=\"!search_complete\">Search for something...</p></div><script>\n\t\t  htmx.on('htmx:afterRequest', function(event) { \n\t\t    query = document.querySelector('[x-data] input[type=text]').value;\n\t\t    if (event.detail.pathInfo.requestPath !== '/api/' + query) return;\n        var jsonResponse = JSON.parse(event.detail.xhr.response);\n        var formattedHtml = jsonResponse.map(function(item) {\n          return '<div> <p id=\"search_results\">' + \"Name: \" + item.name + '</p> </div>';\n        }).join('');\n        document.getElementById('temp_search_results').innerHTML = formattedHtml;\n\t\t  });\n\t\t</script>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = bodyStyles().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</body>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

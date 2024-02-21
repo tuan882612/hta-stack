@@ -49,35 +49,15 @@ func (s *Server) setupRoutes() {
 			return echo.NewHTTPError(http.StatusBadRequest, "name is required")
 		}
 
-		e.Response().WriteHeader(http.StatusOK)
-		return jsoniter.NewEncoder(e.Response().Writer).Encode(map[string]string{"name": name})
-	})
-	s.router.GET("/api/search", func(e echo.Context) error {
-		query := e.QueryParam("id")
-		if query == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "id is required")
+		data := []map[string]string{
+			{"name": name},
+			{"name": "another " + name},
+			{"name": "yet another " + name},
 		}
 
 		e.Response().WriteHeader(http.StatusOK)
-		return jsoniter.NewEncoder(e.Response().Writer).Encode(map[string]string{"query": query})
+		return jsoniter.NewEncoder(e.Response().Writer).Encode(data)
 	})
-	s.router.POST("/api/register", func(e echo.Context) error {
-		body := struct {
-			Name string `json:"name"`
-		}{}
-
-		if err := jsoniter.NewDecoder(e.Request().Body).Decode(&body); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, "invalid request")
-		}
-
-		if body.Name == "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "name is required")
-		}
-
-		e.Response().WriteHeader(http.StatusCreated)
-		return nil
-	})
-
 }
 
 func (s *Server) Start() {
