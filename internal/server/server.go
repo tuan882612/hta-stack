@@ -1,7 +1,12 @@
 package server
 
 import (
+	"context"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/a-h/templ"
 	jsoniter "github.com/json-iterator/go"
@@ -15,13 +20,19 @@ import (
 type Server struct {
 	router  *echo.Echo
 	address string
+	errCh   chan error
 }
 
 func New(addr string) *Server {
-	return &Server{
+	svr := &Server{
 		router:  echo.New(),
 		address: addr,
+		errCh:   make(chan error),
 	}
+	svr.setupMiddleware()
+	svr.setupRoutes()
+	svr.setupViews()
+	return svr
 }
 
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {
@@ -32,13 +43,13 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 
 func (s *Server) setupViews() {
 	s.router.GET("/", func(e echo.Context) error {
-		return Render(e, http.StatusOK, views.Layout())
+		return Render(e, http.StatusOK, views.Index())
 	})
 }
 
 func (s *Server) setupMiddleware() {
 	s.router.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}, latency=${latency_human}\n",
+		Format: "time_unix=${time_unix}, request='${method} ${uri}', status=${status}, latency=${latency_human}\n",
 	}))
 }
 
@@ -60,18 +71,33 @@ func (s *Server) setupRoutes() {
 	})
 }
 
-func (s *Server) Start() {
-	s.setupRoutes()
-	s.setupViews()
-	s.setupMiddleware()
+func (s *Server) watch() {
+	sigch := make(chan os.Signal, 1)
+	signal.Notify(sigch, os.Interrupt, syscall.SIGTERM)
+	<-sigch
 
-	err := make(chan error, 1)
-	go func() {
-		log.Info().Str("address", s.address).Msg("server started")
-		err <- s.router.Start(s.address)
-	}()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	if e := <-err; e != nil {
-		log.Error().Err(e).Msg("server error")
+	err := s.router.Shutdown(ctx)
+	if err != nil {
+		s.errCh <- err
 	}
+
+	close(s.errCh)
+}
+
+func (s *Server) Start() {
+	go s.watch()
+
+	if err := s.router.Start(s.address); err != http.ErrServerClosed {
+		log.Fatal().Err(err).Msg("server error")
+		return
+	}
+	
+	if err, ok := <-s.errCh; ok {
+		log.Fatal().Err(err).Msg("shutdown error")
+	}
+
+	log.Info().Msg("server shutdown gracefully...")
 }
